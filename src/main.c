@@ -10,6 +10,7 @@ static size_t	get_str_len(char *str);
 static void		write_string(char *str);
 static void 	cat(char *file);
 static void		print_dir();
+static void help();
 
 int main()
 {
@@ -54,6 +55,8 @@ static void check_command(char *terminal_text)
 		write_string(terminal_text + 5);
 	else if (str_cmpp(terminal_text, "cat  ", 4) == 0)
 		cat(terminal_text + 4);
+	else if (str_cmp(terminal_text, "help") == 0)
+		help();
 }
 
 static size_t get_str_len(char *str)
@@ -95,4 +98,9 @@ static void cat(char *file)
 			write_string(buffer);
 		}
 	}
+}
+
+static void help()
+{
+	write_string("This is a list of the shells coammands: \n\n\t\thelp - The command used to display this text.\n\t\tpwd - shows the current working directory.\n\t\techo - prints the text after echo to the standard ouptut.\n\t\tcat - disaplays the contents of a file of ascii text.\n");
 }
