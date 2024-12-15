@@ -3,12 +3,13 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-static int str_cmpp(const char *s1, const char *s2, int num);
-static int 	str_cmp(const char *s1, const char *s2);
-static void check_command(char *terminal_text);
-size_t 		get_str_len(char *str);
-void		write_string(char *str);
-void		print_dir();
+static int 		str_cmpp(const char *s1, const char *s2, int num);
+static int 		str_cmp(const char *s1, const char *s2);
+static void 	check_command(char *terminal_text);
+static size_t	get_str_len(char *str);
+static void		write_string(char *str);
+static void 	cat(char *file);
+static void		print_dir();
 
 int main()
 {
@@ -50,12 +51,12 @@ static void check_command(char *terminal_text)
 	else if (str_cmp(terminal_text, "pwd") == 0)
 		print_dir();
 	else if (str_cmpp(terminal_text, "echo ", 5) == 0)
-	{
 		write_string(terminal_text + 5);
-	}
+	else if (str_cmpp(terminal_text, "cat  ", 4) == 0)
+		cat(terminal_text + 4);
 }
 
-size_t get_str_len(char *str)
+static size_t get_str_len(char *str)
 {
 	size_t i;
 
@@ -65,15 +66,33 @@ size_t get_str_len(char *str)
 	return (i);
 }
 
-void write_string(char *str)
+static void write_string(char *str)
 {
 	write(1, str, get_str_len(str));
 }
 
-void print_dir()
+static void print_dir()
 {
 	char buffer[1024];
 	
 	getcwd(buffer, sizeof(buffer));
 	write_string(buffer);
+}
+
+static void cat(char *file)
+{
+	char buffer[buffer_size + 1];
+	int read_bytes = 0;
+	int fd;
+
+	buffer[buffer_size] = '\0';
+	if ((fd = open(file, 0)) == -1)
+		write_string("\nFile Error\n");
+	else 
+	{
+		while ((read_bytes = read(fd, buffer, buffer_size)))
+		{
+			write_string(buffer);
+		}
+	}
 }
