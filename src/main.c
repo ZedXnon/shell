@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <dirent.h>
 
 static int 		str_cmpp(const char *s1, const char *s2, int num);
 static int 		str_cmp(const char *s1, const char *s2);
@@ -89,15 +90,19 @@ static void cat(char *file)
 	int fd;
 
 	buffer[buffer_size] = '\0';
-	if ((fd = open(file, 0)) == -1)
-		write_string("\nFile Error\n");
+	if ((fd = open(file, O_RDONLY)) == -1)
+		write_string("\nError opening file\n");
 	else 
 	{
 		while ((read_bytes = read(fd, buffer, buffer_size)))
 		{
+			buffer[read_bytes] = '\0';
 			write_string(buffer);
 		}
+		 if (read_bytes == -1)
+        write_string("\nError reading file\n");
 	}
+	close(fd);
 }
 
 static void help()
