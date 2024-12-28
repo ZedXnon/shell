@@ -1,17 +1,11 @@
 #define buffer_size 1024
 #include <unistd.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <dirent.h>
+#include "utills.h"
+#include "commands.h"
 
-static int 		str_cmpp(const char *s1, const char *s2, int num);
-static int 		str_cmp(const char *s1, const char *s2);
-static void 	check_command(char *terminal_text);
-static size_t	get_str_len(char *str);
-static void		write_string(char *str);
-static void 	cat(char *file);
-static void		print_dir();
-static void help();
+static void check_command(char *terminal_text);
 
 int main()
 {
@@ -31,21 +25,6 @@ int main()
 	return (0);
 }
 
-static int str_cmp(const char *s1, const char *s2)
-{
-    int i = 0;
-    while (s1[i] && s2[i] && s1[i] == s2[i])
-        i++;
-    return s1[i] - s2[i];
-}
-
-static int str_cmpp(const char *s1, const char *s2, int num)
-{
-    int i = 0;
-    while (s1[i] && s1[i] == s2[i] && i < num - 1)
-        i++;
-    return s1[i] - s2[i];
-}
 static void check_command(char *terminal_text)
 {
 	if (str_cmp(terminal_text, "test") == 0)
@@ -54,58 +33,14 @@ static void check_command(char *terminal_text)
 		print_dir();
 	else if (str_cmpp(terminal_text, "echo ", 5) == 0)
 		write_string(terminal_text + 5);
-	else if (str_cmpp(terminal_text, "cat  ", 4) == 0)
+	else if (str_cmpp(terminal_text, "cat ", 4) == 0)
 		cat(terminal_text + 4);
+	else if (str_cmp(terminal_text, "ls") == 0)
+		ls();
 	else if (str_cmp(terminal_text, "help") == 0)
 		help();
 }
 
-static size_t get_str_len(char *str)
-{
-	size_t i;
-
-	i = 0;
-	while(str[i])
-		i++;
-	return (i);
-}
-
-static void write_string(char *str)
-{
-	write(1, str, get_str_len(str));
-}
-
-static void print_dir()
-{
-	char buffer[1024];
-	
-	getcwd(buffer, sizeof(buffer));
-	write_string(buffer);
-}
-
-static void cat(char *file)
-{
-	char buffer[buffer_size + 1];
-	int read_bytes = 0;
-	int fd;
-
-	buffer[buffer_size] = '\0';
-	if ((fd = open(file, O_RDONLY)) == -1)
-		write_string("\nError opening file\n");
-	else 
-	{
-		while ((read_bytes = read(fd, buffer, buffer_size)))
-		{
-			buffer[read_bytes] = '\0';
-			write_string(buffer);
-		}
-		 if (read_bytes == -1)
-        write_string("\nError reading file\n");
-	}
-	close(fd);
-}
-
-static void help()
-{
-	write_string("This is a list of the shells coammands: \n\n\t\thelp - The command used to display this text.\n\t\tpwd - shows the current working directory.\n\t\techo - prints the text after echo to the standard ouptut.\n\t\tcat - disaplays the contents of a file of ascii text.\n");
-}
+// need to add another command to edit files/ create them
+// need to add a command history with keyboard keys.
+// need to add tab autocompletion in alphabetical order 
