@@ -1,5 +1,10 @@
 #include "utills.h"
 
+int is_printable(char c)
+{
+	return (c >= 26 && c <= 126);
+}
+
 int str_cmp(const char *s1, const char *s2)
 {
     int i = 0;

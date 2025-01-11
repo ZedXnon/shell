@@ -9,5 +9,6 @@ int str_cmp(const char *s1, const char *s2);
 int str_cmpp(const char *s1, const char *s2, int num);
 size_t get_str_len(char *str);
 void write_string(char *str);
+int is_printable(char c);
 
 #endif
