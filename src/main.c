@@ -5,23 +5,23 @@
 #include "main.h"
 #include <stdio.h>
 
-// need to change the funcitonality so that instead of reading the entire string from the terminal into a buffer
-// I will sintead read each byte one at a time and analyse them to see if they are characters or if they are arrow or tab keys.
-// if it is a char it needs to get added to the next position inside a buffer 
-// if it is a special key it then needs to manipulate the cursor if its the arrow keys and move through the command history so everytime I press enter there needs to be soemthing that not only prints the text but also puts it in an array of pointers to arrays of chars that contain the command hsotry and basically the arrow keys will move through the index of the buffer.
-// the command history array will be a fixed size which means I should pick a good number probably 20 for now I can always inicrease later.
-// going through the buffer needs to compleltey remove what is currently inside the terminal but also save it so bascially the current part of the terminal that is being edited needs to be placed into the array for the command history by default
-/*
-There needs to be a way of navigating through the command hsitory at any point of entering text and analysing it
-
-*/
 int main()
 {
 	size_t i;
 	int	status = 1;
 	char buffer[buffer_size + 1];
+	char *command_history[HISTORY_LENGTH];
 	int read_bytes = 0;
+	int history_index = 0;
+	int history_offset = 0;
+	int current_position = 0;
 	char c;
+	while (history_index < HISTORY_LENGTH)
+	{
+		command_history[history_index] = NULL;
+		history_index++;
+	}
+	history_index = 0;
 	set_raw_mode();
 	buffer[buffer_size] = '\0';
 	while (status)
@@ -45,23 +45,54 @@ int main()
             		read(STDIN_FILENO, &c, 1);
             		if (c == 'A') 
 					{
-                		write_string("Up arrow detected!\n");
+						if (current_position == 0)
+						{
+							// save current buffer into temp buffer
+						}
+						if (history_offset < HISTORY_LENGTH - 1 && current_position > 0)
+						{
+							if (current_position > 0)
+								current_position--;
+							else
+								current_position = HISTORY_LENGTH - 1;
+							history_offset++;
+                			write_string("\x1b[2K\r> ");
+							str_cpy(command_history[current_position], buffer);
+							write_string(command_history[current_position]);
+							i = get_str_len(command_history[current_position]);
+						}
+						//up arrow
            			} 	
 					else if (c == 'B') 
 					{
-            	    	write_string("Down arrow detected!\n");
+						if (history_offset > 0)
+						{
+							if (current_position < HISTORY_LENGTH - 1)
+								current_position++;
+							else
+								current_position = 0;
+							history_offset--;
+							write_string("\x1b[2K\r> ");
+							if (history_offset > 1)
+							{
+								str_cpy(command_history[current_position], buffer);
+								write_string(command_history[current_position]);
+								i = get_str_len(command_history[current_position]);
+							}
+						}
+            	    	// Down Arrow
             		} 
 					else if (c == 'C') 
 					{
 						write(STDIN_FILENO, "\x1b[C", 3);
 						i++;
-            	    	//write_string("Right arrow detected!\n");
+            	    	// Right Arrow
             		} 
 					else if (c == 'D' && i > 0) 
 					{
 						write(STDIN_FILENO, "\x1b[D", 3);
 						i--;
-            	    	//write_string("Left arrow detected!\n");
+            	    	// Left Arrow
             		}
             	}
         	} 
@@ -78,10 +109,6 @@ int main()
 					write(STDIN_FILENO, "\x1b[D", 3);
 					}
 				}
-				if (c == 37 && i > 0)
-					i--;
-				if (c == 39)
-					i++;
 				else if (is_printable(c))
 				{
 					write(STDIN_FILENO, &c, 1);
@@ -90,8 +117,17 @@ int main()
 				}
 			}
 		}
+		history_offset = 0;
 		write(1, "\n", 1);
 		buffer[i] = '\0';
+		if (command_history[history_index] != NULL)
+			free(command_history[history_index]);
+		command_history[history_index] = strdup(buffer);
+		if (history_index < HISTORY_LENGTH - 1)
+			history_index++;
+		else
+			history_index = 0;
+		current_position = history_index;
 		check_command(buffer);
 	}
 	return (0);
@@ -127,7 +163,3 @@ void set_raw_mode()
     newt.c_cc[VTIME] = 0; // No timeout
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);  // Apply the new settings immediately
 }
-
-// need to add another command to edit files/ create them
-// need to add a command history with keyboard keys.
-// need to add tab autocompletion in alphabetical order 

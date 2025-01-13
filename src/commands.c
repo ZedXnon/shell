@@ -11,6 +11,7 @@ struct linux_dirent64 {
     unsigned char d_type;
     char d_name[];
 };
+
 void print_dir()
 {
 	char buffer[1024];
